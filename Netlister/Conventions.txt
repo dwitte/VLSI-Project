@@ -1,6 +1,23 @@
 Netlist Naming Conventions
 --------------------------
 
+File format:
+
+chipname
+netlist_generation_program_name
+Errors:
+	
+list_of_errors
+
+Parts:
+
+list_of_cell_and_block_names
+
+Nets:
+
+list_of_net_names
+
+
 Types:
 	nets:
 		format: netname startX startY startLayer endX endY endLayer
