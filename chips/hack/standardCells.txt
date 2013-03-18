@@ -1,3 +1,4 @@
+//TODO: Add size of chips, and pin in and out locations of the cells. This is necessary for routing, but could also help in the placement algorithm.
 And
 Nand
 Nor
