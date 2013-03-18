@@ -12,4 +12,4 @@ Added Netlist folder and netlist naming conventions for this project. Code for g
 
 Added hdl files to project. I am not using my solutions, I pulled from a repository made by lemmingapex. You can download his solutions from his repo at https://github.com/lemmingapex/elements_of_computing_systems.git
 
-
+Added list of standard cells that will be used to create the chip. I will not add any more than these, as it would make the project far too simple. In time, I may add a few more, so that I can test out features of the layout program as it progresses.

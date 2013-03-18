@@ -1,0 +1,7 @@
+And
+Nand
+Nor
+Not
+Or
+Mux
+Bit
