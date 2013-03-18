@@ -1,7 +1,9 @@
 And
 Nand
 Nor
+Xor
 Not
 Or
 Mux
+DMux
 Bit
