@@ -1,0 +1,19 @@
+Netlist Naming Conventions
+--------------------------
+
+Types:
+	nets:
+		format: netname startX startY startLayer endX endY endLayer
+	
+		examples:
+			input
+				- in_name_targetcell startX startY startLayer endX endY endLayer
+			output
+				- out_name_startcell startX startY startLayer endX endY endLayer
+			internal
+				- wire_name_targetcell_startcell startXstartY startLayer endX endY endLayer
+	cells:
+		format: cellname x y width height
+		
+		example:
+			cell_name_occurance# x y width height
