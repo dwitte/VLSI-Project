@@ -7,3 +7,4 @@ March 18, 2013:
 ---------------
 
 Added Netlist folder and netlist naming conventions for this project. Code for generating the netlists will be put into that folder.
+Added hdl files to project. I am not using my solutions, I pulled from a repository made by lemmingapex. You can download his solutions from his repo at https://github.com/lemmingapex/elements_of_computing_systems.git
