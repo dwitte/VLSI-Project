@@ -56,6 +56,7 @@ struct State simulatedAnnealing()
 			bestState = newState;
 			bestCost = newCost;
 		}
+		k = k +1;
 	}
 	return bestState;
 }
