@@ -7,12 +7,18 @@ my $platform = $params[0];
 my $component = $params[1];
 
 my $file = "../chips/$platform/$component.hdl";
+my $inputY = 0;
+my $inputX = 0;
+my $outputY = 0;
+my $outputX = 0;
 
 #my @all_tokens;
 
 print "Accessing $file \n";
 
 open (componentfile, $file);
+
+print "Reading in tokens\n";
 
 while (<componentfile>)
 {
@@ -29,6 +35,8 @@ while (<componentfile>)
 		push(@all_tokens, $token);
 	}
 }
+
+print "Read in all tokens\n";
 
 close (componentfile);
 
@@ -49,6 +57,8 @@ foreach my $token (@all_tokens)
 		push(@clean_tokens, $token);;
 	}
 }
+
+print "Opening the output netlist file.";
 
 #Write all components to the output netlist file.
 open (netlistfile, ">../chips/$platform/netlists/$component.net");
@@ -121,7 +131,8 @@ sub parse_Inputs
 			local $array_count = $token;
 			for($i = 0; $i < $array_count; $i++)
 			{
-				print netlistfile "\t$pin\[$i\] input \n";
+				print netlistfile "\t$pin\[$i\] input $inputX $inputY\n";
+				$inputY += 5;
 			}
 			$token = shift(@clean_tokens);
 		}
@@ -150,7 +161,8 @@ sub parse_Outputs
 			local $array_count = $token;
 			for($i = 0; $i < $array_count; $i++)
 			{
-				print netlistfile "\t$pin\[$i\] output \n";
+				print netlistfile "\t$pin\[$i\] output $outputX $outputY\n";
+				$outputY += 5;
 			}
 			$token = shift(@clean_tokens);
 		}
