@@ -42,6 +42,7 @@ close (componentfile);
 
 foreach my $token (@all_tokens)
 {
+	print "$token\n";
 	if($token =~ /\/\*/)
 	{
 		$in_comment = 1;
@@ -57,6 +58,8 @@ foreach my $token (@all_tokens)
 		push(@clean_tokens, $token);;
 	}
 }
+
+sleep(10);
 
 print "Opening the output netlist file.";
 
@@ -110,7 +113,7 @@ sub parse_Chip
 
 	print netlistfile "}\n\nParts\n{\n";
 	$token = shift(@clean_tokens);
-	if($token eq "Parts:" )
+	if($token eq "PARTS:" )
 	{
 		#call Parts Function;
 		parse_Parts();
@@ -180,5 +183,48 @@ sub parse_Outputs
 
 sub parse_Parts
 {
-	
+	while($token ne "}")
+	{
+		$token = shift(@clean_tokens);
+		print "\} => $token\n";
+		sleep(1);
+		if($token eq "")
+		{
+			return;
+		}
+		local $part = $token;
+		print "PartName == $token\n\n";
+		$token = shift(@clean_tokens); ### Should be '('
+		while($token ne "\)")
+		{
+			$token = shift(@clean_tokens); ### Get first pin name of chip.
+			print "pinName == $token\n";
+			local $partsPinName = $token;
+			$token = shift(@clean_tokens); ### Should be '='
+			$token = shift(@clean_tokens); ### Get the local pin name.
+			print "localpinName == $token\n";
+			local $pinName = $token;
+			$token = shift(@clean_tokens);
+			print "\[ == $token\n";
+			if($token eq "\[")
+			{
+				print "Adding the index, if needed.\n";
+				$token = shift(@clean_tokens);
+				print "index == $token\n";
+				local $index = $token;
+				print netlistfile "\t$part $partsPinName $pinName\[$index\]\n";
+				$token = shift(@clean_tokens);
+				$token = shift(@clean_tokens); 
+			}
+			else
+			{
+				print netlistfile "\t$part $partsPinName $pinName\n";
+			}
+			print "\) => $token\n";
+		}
+		$token = shift(@clean_tokens);
+		print "; => $token\n";
+		sleep(1);
+	}
 }
+
