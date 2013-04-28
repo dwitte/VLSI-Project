@@ -11,6 +11,7 @@ my $inputY = 0;
 my $inputX = 0;
 my $outputY = 0;
 my $outputX = 0;
+my %cellCounter = ();
 
 #my @all_tokens;
 
@@ -58,8 +59,6 @@ foreach my $token (@all_tokens)
 		push(@clean_tokens, $token);;
 	}
 }
-
-sleep(10);
 
 print "Opening the output netlist file.";
 
@@ -183,36 +182,54 @@ sub parse_Outputs
 
 sub parse_Parts
 {
+	print netlistfile "\tNets\n";
+	print netlistfile "\t{\n";
 	while($token ne "}")
 	{
 		$token = shift(@clean_tokens);
-		print "\} => $token\n";
-		sleep(1);
 		if($token eq "")
 		{
+			print netlistfile "\t}\n";
+
+			print netlistfile "\tCells\n";
+			print netlistfile "\t{\n";
+			for my $key ( keys %cellCounter )
+			{
+				local $number = 0;
+				print "$cellCounter{$key}";
+				while ($number lt $cellCounter{$key})
+				{
+					print netlistfile "\t\t$key\_$number\n";
+					$number = $number +1;
+				}
+			}
+			print netlistfile "\t}\n";
+
 			return;
 		}
 		local $part = $token;
-		print "PartName == $token\n\n";
+		if($cellCounter{$part} eq '')
+		{
+			$cellCounter{$part} = 0;
+		}
+		else
+		{
+			$cellCounter{$part} = $cellCounter{$part} + 1;
+		}
 		$token = shift(@clean_tokens); ### Should be '('
 		while($token ne "\)")
 		{
 			$token = shift(@clean_tokens); ### Get first pin name of chip.
-			print "pinName == $token\n";
 			local $partsPinName = $token;
 			$token = shift(@clean_tokens); ### Should be '='
 			$token = shift(@clean_tokens); ### Get the local pin name.
-			print "localpinName == $token\n";
 			local $pinName = $token;
 			$token = shift(@clean_tokens);
-			print "\[ == $token\n";
 			if($token eq "\[")
 			{
-				print "Adding the index, if needed.\n";
 				$token = shift(@clean_tokens);
-				print "index == $token\n";
 				local $index = $token;
-				print netlistfile "\t$part $partsPinName $pinName\[$index\]\n";
+				print netlistfile "\t\t$part\_$cellCounter{$part} $partsPinName $pinName\[$index\]\n";
 				$token = shift(@clean_tokens);
 				$token = shift(@clean_tokens); 
 			}
@@ -220,11 +237,8 @@ sub parse_Parts
 			{
 				print netlistfile "\t$part $partsPinName $pinName\n";
 			}
-			print "\) => $token\n";
 		}
 		$token = shift(@clean_tokens);
-		print "; => $token\n";
-		sleep(1);
 	}
 }
 
