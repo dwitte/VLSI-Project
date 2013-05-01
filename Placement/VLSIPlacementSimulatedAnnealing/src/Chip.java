@@ -98,6 +98,11 @@ public class Chip {
 		placeCells();
 	}
 	
+	public ArrayList<ArrayList<Cell>> getCells()
+	{
+		return chip;
+	}
+	
 	private void placeCells()
 	{
 		chip = new ArrayList<ArrayList<Cell>>();
@@ -187,7 +192,7 @@ public class Chip {
 				}
 			}
 		}
-		System.out.println(cost);
+		//System.out.println(cost);
 		return cost;
 	}
 	

@@ -32,8 +32,13 @@ public class SimulatedAnnealer {
 			if(prob > perc)
 			{
 				//System.out.println(prob + ">" + perc);
+				System.out.println(newCost + "\t" + temp);
 				state = newState;
 				cost = newCost;
+			}
+			else
+			{
+				System.out.println(cost + "\t" + temp);
 			}
 			if(newCost < bestCost)
 			{
@@ -78,6 +83,6 @@ public class SimulatedAnnealer {
 	
 	private double P(int cost, int newCost, double temperature)
 	{
-		return Math.exp(-(newCost-cost)/temperature);
+		return Math.exp(-(newCost-cost+1)/temperature);
 	}
 }
