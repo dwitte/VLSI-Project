@@ -1,13 +1,26 @@
-import java.util.ArrayList;
-
 
 public class Net {
-	ArrayList<Pin> inputs;
-	ArrayList<Pin> outputs;
+	private Pin a;
+	private Pin b;
 	
-	public Net()
+	Net(Pin a, Pin b)
 	{
-		inputs = new ArrayList<Pin>();
-		outputs = new ArrayList<Pin>();
+		this.a = a;
+		this.b = b;
+	}
+	
+	public int cost()
+	{
+		return (Math.abs(a.x-b.x) + Math.abs(a.y-b.y));
+	}
+	
+	public Pin getPinA()
+	{
+		return a;
+	}
+	
+	public Pin getPinB()
+	{
+		return b;
 	}
 }

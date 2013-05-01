@@ -1,0 +1,8 @@
+
+public class Main {
+	public static void main(String[] args) {
+		SimulatedAnnealer sa = new SimulatedAnnealer(.95);
+		Chip finalChip = sa.runSimulateAnnealer("../../chips/hack/netlists/And16.net", 1000, 250)
+	}
+
+}

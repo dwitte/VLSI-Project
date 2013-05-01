@@ -1,0 +1,72 @@
+import java.util.ArrayList;
+
+
+public class Cell {
+	private String name;
+	private double xLocation, yLocation;
+	private double height, width;
+	private ArrayList<Pin> pins;
+	private ArrayList<Net> nets;
+	
+	public Cell(String name, double x, double y, double height, double width)
+	{
+		this.name = name;
+		xLocation = x;
+		yLocation = y;
+		this.height = height;
+		this.width = width;
+		pins = new ArrayList<Pin>();
+	}
+	
+	public int cellCost()
+	{
+		int cost = 0;
+		for(Net net : nets)
+		{
+			
+		}
+		return cost;
+	}
+
+	public void addNet(Net net)
+	{
+		nets.add(net);
+	}
+	
+	public ArrayList<Pin> getPins() {
+		return pins;
+	}
+
+	public void addPin(Pin in)
+	{
+		pins.add(in);
+	}
+
+	public double getxLocation() {
+		return xLocation;
+	}
+
+	public void setxLocation(double xLocation) {
+		this.xLocation = xLocation;
+	}
+
+	public double getyLocation() {
+		return yLocation;
+	}
+
+	public void setyLocation(double yLocation) {
+		this.yLocation = yLocation;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public double getHeight() {
+		return height;
+	}
+
+	public double getWidth() {
+		return width;
+	}
+}

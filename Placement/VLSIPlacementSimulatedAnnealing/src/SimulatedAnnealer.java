@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Random;
 
 
@@ -17,15 +18,20 @@ public class SimulatedAnnealer {
 		int bestCost = cost;
 		double temp = startTemp;
 		
-		int maxCost = state.cellCount()*(state.getHeight()+state.getWidth());
+		int maxCost = state.cellCount()*(state.getHeight()+state.getWidth())*state.netCount();
 		int k = 0;
 		while(k < kMax && cost < maxCost)
 		{
 			temp = temp * alpha;
+			//System.out.println(temp);
 			Chip newState = neighbour(state);
 			int newCost = newState.cost();
-			if(P(cost, newCost, temp) > randomPercentage())
+			double prob = (P(cost,newCost,temp));
+			double perc = randomPercentage();
+			//System.out.println(prob + ">" + perc);
+			if(prob > perc)
 			{
+				//System.out.println(prob + ">" + perc);
 				state = newState;
 				cost = newCost;
 			}
@@ -35,6 +41,12 @@ public class SimulatedAnnealer {
 				bestCost = newCost;
 			}
 			k = k+1;
+			/*try {
+				System.in.read();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 		}
 		return bestState;
 	}
@@ -46,7 +58,16 @@ public class SimulatedAnnealer {
 	
 	private Chip neighbour(Chip state)
 	{
-		return state;
+		Chip newState = new Chip(state);
+		Random rand = new Random();
+		int x1 = Math.abs(rand.nextInt()%(state.getWidth()/10));
+		int y1 = Math.abs(rand.nextInt()%(state.getHeight()/10));
+		int x2 = Math.abs(rand.nextInt()%(state.getWidth()/10));
+		int y2 = Math.abs(rand.nextInt()%(state.getHeight()/10));
+		
+		newState.swap(x1, y1, x2, y2);
+		
+		return newState;
 	}
 	
 	private double randomPercentage()

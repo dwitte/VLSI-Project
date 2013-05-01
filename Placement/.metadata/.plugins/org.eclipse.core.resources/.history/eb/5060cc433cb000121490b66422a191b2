@@ -1,0 +1,184 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+
+public class Chip {
+	private String name;
+	private ArrayList<ArrayList<Cell>> chip;
+	private int height;
+	private int width;
+	private ArrayList<Pin> externalPins;
+	private ArrayList<Cell> cells;
+	private ArrayList<Cell> libraryCells;
+	
+	public Chip(String filename)
+	{
+		libraryCells = new ArrayList<Cell>();
+		readLibraryCellsIn();
+		
+		cells = new ArrayList<Cell>();
+		externalPins = new ArrayList<Pin>();
+		File chipNetlist = new File(filename);
+		try {
+			Scanner scanner = new Scanner(chipNetlist);
+			name = scanner.nextLine();
+			width = scanner.nextInt();
+			height = scanner.nextInt();
+			while(scanner.hasNext())
+			{
+				String section = scanner.nextLine();
+				section = scanner.nextLine();
+				if(section.contains("Pins"))
+				{
+					scanner.nextLine();
+					String temp = scanner.next();
+					if(!temp.contains("}"))
+					{
+						String name = temp;
+						String type = scanner.next();
+						int pinX = scanner.nextInt();
+						int pinY = scanner.nextInt();
+						externalPins.add(new Pin(name, type, pinX, pinY));
+						temp = scanner.next();
+					}
+				}
+				else if(section.contains("Parts"))
+				{
+					scanner.nextLine();
+					while(scanner.hasNext())
+					{
+						if(scanner.nextLine() == "Nets")
+						{
+							scanner.nextLine();
+							String temp = scanner.next();
+							while(temp != "}")
+							{
+								if(hasCellMade(temp))
+								{
+									
+								}
+								else
+								{
+									Cell newCell = new Cell(temp,0,0,10,10);
+									scanner.nextLine();
+									String pin = scanner.nextLine();
+									if(hasPinInInputs(pin))
+									{
+										
+									}
+									cells.add(new Cell(temp,0,0,10,10));
+									
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void readLibraryCellsIn()
+	{
+		File standardCells = new File("../../chips/hack/standardCells.txt");
+		try {
+			Scanner scanner = new Scanner(standardCells);
+			while(scanner.hasNext())
+			{
+				String stdCellName = scanner.nextLine();
+				libraryCells.add(new Cell(stdCellName, 0,0, 10, 10));
+				scanner.nextLine();
+				String temp = scanner.next();
+				while(!temp.contains("}"))
+				{
+					String pinName = temp;
+					String pinType = scanner.next();
+					int pinX = scanner.nextInt();
+					int pinY = scanner.nextInt();
+					libraryCells.get(libraryCells.size()-1).addPin(new Pin(pinName, pinType, pinX, pinY));
+					temp = scanner.next();
+				}
+				if(scanner.hasNext())
+				{
+					scanner.nextLine();
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
+	
+	public int cost()
+	{
+		int cost = 0;
+		for(ArrayList<Cell> row1 : chip)
+		{
+			for(Cell cell1 : row1)
+			{
+				for(ArrayList<Cell> row2 : chip)
+				{
+					for(Cell cell2 : row2)
+					{
+						cost += (int)Math.abs(cell1.getxLocation()-cell2.getxLocation());
+						cost += (int)Math.abs(cell1.getyLocation()-cell2.getyLocation());
+					}
+				}
+			}
+		}
+		return cost;
+	}
+	public int cellCount()
+	{
+		int numCells = 0;
+		for(ArrayList<Cell> row : chip)
+		{
+			for(Cell cell : row)
+			{
+				if(cell.getName() != "filler")
+				{
+					numCells++;
+				}
+			}
+		}
+		return numCells;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+	
+	public int getWidth()
+	{
+		return width;
+	}
+	
+	private boolean hasCellMade(String cellName)
+	{
+		for(Cell cell : cells)
+		{
+			if(cell.getName() == cellName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean hasPinInInputs(String pinName)
+	{
+		for(Pin pin : externalPins)
+		{
+			if(pin.getName() == pinName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}

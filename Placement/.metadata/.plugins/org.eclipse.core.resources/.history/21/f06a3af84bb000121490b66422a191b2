@@ -1,0 +1,5 @@
+
+public class Net {
+	private Pin a;
+	private Pin b;
+}

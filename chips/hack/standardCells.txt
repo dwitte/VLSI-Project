@@ -1,10 +1,55 @@
-//TODO: Add size of chips, and pin in and out locations of the cells. This is necessary for routing, but could also help in the placement algorithm.
 And
+{
+	a input 5 5
+	b input 5 5
+	out output 5 5
+}
 Nand
+{
+	a input 5 5
+	b input 5 5
+	out output 5 5
+}
 Nor
+{
+	a input 5 5
+	b input 5 5
+	out output 5 5
+}
 Xor
+{
+	a input 5 5
+	b input 5 5
+	out output 5 5
+}
 Not
+{
+	in input 5 5
+	out output 5 5
+}
 Or
+{
+	a input 5 5
+	b input 5 5
+	out output 5 5
+}
 Mux
+{
+	a input 5 5
+	b input 5 5
+	sel input 5 5
+	out output 5 5
+}
 DMux
+{
+	in input 5 5
+	sel input 5 5
+	a output 5 5
+	b output 5 5
+}
 Bit
+{
+	in input 5 5
+	load input 5 5
+	out output 5 5
+}

@@ -1,99 +1,206 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 
 public class Chip {
+	private String name;
 	private ArrayList<ArrayList<Cell>> chip;
 	private int height;
 	private int width;
-	private String name;
-	private ArrayList<Pin> pins;
-	private ArrayList<Net> nets;
+	private ArrayList<Pin> externalPins;
 	private ArrayList<Cell> cells;
+	private ArrayList<Cell> libraryCells;
+	
+	public Chip(Chip oldChip)
+	{
+		this.name = oldChip.name;
+		this.height = oldChip.height;
+		this.width = oldChip.width;
+		this.chip = new ArrayList<ArrayList<Cell>>();
+		for(int i = 0; i < height/10; i++)
+		{
+			this.chip.add(new ArrayList<Cell>());
+			for(Cell cell : oldChip.chip.get(0))
+			{
+				this.chip.get(i).add(new Cell(cell));
+			}
+		}
+		this.externalPins = oldChip.externalPins;
+		this.cells = oldChip.cells;
+		this.libraryCells = oldChip.libraryCells;
+	}
 	
 	public Chip(String filename)
 	{
-		pins = new ArrayList<Pin>();
+		libraryCells = new ArrayList<Cell>();
+		readLibraryCellsIn();
+		
+		cells = new ArrayList<Cell>();
+		externalPins = new ArrayList<Pin>();
 		File chipNetlist = new File(filename);
 		try {
 			Scanner scanner = new Scanner(chipNetlist);
 			name = scanner.nextLine();
-			height = scanner.nextInt();
 			width = scanner.nextInt();
+			height = scanner.nextInt();
 			while(scanner.hasNext())
 			{
-				if(scanner.nextLine() == "Pins")
+				String section = scanner.nextLine();
+				section = scanner.nextLine();
+				if(section.contains("Pins"))
 				{
 					scanner.nextLine();
 					String temp = scanner.next();
-					if(temp != "}")
+					while(!temp.contains("}"))
 					{
-						String name = scanner.next();
-						String type = scanner.next();
+						String pinName = temp;
+						String pinType = scanner.next();
 						int pinX = scanner.nextInt();
 						int pinY = scanner.nextInt();
-						pins.add(new Pin(name, pinX, pinY));
+						externalPins.add(new Pin(pinName, pinType, pinX, pinY));
+						temp = scanner.next();
 					}
 				}
-				else if(scanner.nextLine() == "Parts")
+				else if(section.contains("Parts"))
 				{
 					scanner.nextLine();
-					while(scanner.hasNext())
+					String temp = scanner.next();
+					while(!temp.contains("}"))
 					{
-						if(scanner.nextLine() == "Nets")
+						String cellName = temp;
+						String libPinName = scanner.next();
+						String extPinName = scanner.next();
+						if(hasCellMade(cellName))
 						{
-							scanner.nextLine();
-							String temp = scanner.next();
-							while(temp != "}")
-							{
-								if(hasCellMade(temp))
-								{
-									
-								}
-								else
-								{
-									Cell newCell = new Cell(temp,0,0,10,10);
-									scanner.nextLine();
-									String pin = scanner.nextLine();
-									if(hasPinInInputs(pin))
-									{
-										
-									}
-									cells.add(new Cell(temp,0,0,10,10));
-									
-								}
-							}
+							Cell cell = findCellByName(cellName);
+							String libCellName = cellName.substring(0, cellName.indexOf('_'));
+							Net net = new Net(getPinFromLibraryCells(libCellName, libPinName),findPinByName(extPinName));
+							cell.addNet(net);
 						}
+						else
+						{
+							cells.add(new Cell(cellName,0,0,10,10));
+							String libCellName = cellName.substring(0, cellName.indexOf('_'));
+							Net net = new Net(getPinFromLibraryCells(libCellName, libPinName),findPinByName(extPinName));
+							cells.get(cells.size()-1).addNet(net);
+						}
+						temp = scanner.next();
 					}
+				}
+				scanner.nextLine();
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		placeCells();
+	}
+	
+	private void placeCells()
+	{
+		chip = new ArrayList<ArrayList<Cell>>();
+		for(int i = 0; i < height/10; i++)
+		{
+			chip.add(new ArrayList<Cell>());
+		}
+		
+		int x = 0;
+		int y = 0;
+		for(Cell cell : cells)
+		{
+			cell.setxLocation(x);
+			cell.setyLocation(y);
+			chip.get(y/10).add(cell);
+			x += 10;
+			if(x == width)
+			{
+				x = 0;
+				y += 10;
+			}
+		}
+		
+		for(ArrayList<Cell> row : chip)
+		{
+			while(row.size() < width/10)
+			{
+				row.add(new Cell("filler", x, y, 10, 10));
+				x += 10;
+				if( x == width)
+				{
+					x = 0;
+					y += 10;
+				}
+			}
+		}
+	}
+	
+	private void readLibraryCellsIn()
+	{
+		File standardCells = new File("../../chips/hack/standardCells.txt");
+		try {
+			Scanner scanner = new Scanner(standardCells);
+			while(scanner.hasNext())
+			{
+				String stdCellName = scanner.nextLine();
+				libraryCells.add(new Cell(stdCellName, 0,0, 10, 10));
+				scanner.nextLine();
+				String temp = scanner.next();
+				while(!temp.contains("}"))
+				{
+					String pinName = temp;
+					String pinType = scanner.next();
+					int pinX = scanner.nextInt();
+					int pinY = scanner.nextInt();
+					libraryCells.get(libraryCells.size()-1).addPin(new Pin(pinName, pinType, pinX, pinY));
+					temp = scanner.next();
+				}
+				if(scanner.hasNext())
+				{
+					scanner.nextLine();
 				}
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return;
 	}
 	
 	public int cost()
 	{
 		int cost = 0;
-		for(ArrayList<Cell> row1 : chip)
+		for(ArrayList<Cell> row : chip)
 		{
-			for(Cell cell1 : row1)
+			for(Cell cell : row)
 			{
-				for(ArrayList<Cell> row2 : chip)
+				for(Net net : cell.getNets())
 				{
-					for(Cell cell2 : row2)
+					if(findPinByName(net.getPinA().getName()) != null)
 					{
-						cost += (int)Math.abs(cell1.getxLocation()-cell2.getxLocation());
-						cost += (int)Math.abs(cell1.getyLocation()-cell2.getyLocation());
+						cost += Math.abs(cell.getxLocation() - net.getPinA().x) + Math.abs(cell.getyLocation() - net.getPinA().y) + net.getPinB().x + net.getPinB().y; 
+					}
+					else //TODO: Figure out a different data structure to handle this instance.
+					{
+						//cost += cell.getxLocation() + cell.getyLocation();
 					}
 				}
 			}
 		}
+		System.out.println(cost);
 		return cost;
 	}
+	
+	public int netCount()
+	{
+		int count = 0;
+		for(Cell  cell : cells)
+		{
+			count += cell.getNets().size();
+		}
+		return count;
+	}
+	
 	public int cellCount()
 	{
 		int numCells = 0;
@@ -124,7 +231,7 @@ public class Chip {
 	{
 		for(Cell cell : cells)
 		{
-			if(cell.getName() == cellName)
+			if(cell.getName().contains(cellName))
 			{
 				return true;
 			}
@@ -132,15 +239,59 @@ public class Chip {
 		return false;
 	}
 	
-	private boolean hasPinInInputs(String pinName)
+	private Cell findCellByName(String cellName)
 	{
-		for(Pin pin : pins)
+		for(Cell cell : cells)
 		{
-			if(pin.getName() == pinName)
+			if(cell.getName().contains(cellName))
 			{
-				return true;
+				return cell;
 			}
 		}
-		return false;
+		return null;
+	}
+	
+	private Pin findPinByName(String pinName)
+	{
+		for(Pin pin : externalPins)
+		{
+			if(pin.getName().contains(pinName))
+			{
+				return pin;
+			}
+		}
+		return null;
+	}
+	
+	private Pin getPinFromLibraryCells(String cellName, String pinName)
+	{
+		for(Cell cell : libraryCells)
+		{
+			if(cell.getName().contains(cellName))
+			{
+				for(Pin pin : cell.getPins())
+				{
+					if(pin.getName().contains(pinName))
+					{
+						return pin;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public void swap(int x1, int y1, int x2, int y2) {
+		Cell temp = chip.get(y2).get(x2);
+		chip.get(y2).get(x2).setxLocation(x1*10);
+		chip.get(y2).get(x2).setxLocation(y2*10);
+		chip.get(y2).get(x2).setNets(chip.get(y1).get(x1).getNets());
+		chip.get(y2).get(x2).setPins(chip.get(y1).get(x1).getPins());
+		chip.get(y2).get(x2).setName(chip.get(y1).get(x1).getName());
+		chip.get(y1).get(x1).setxLocation(temp.getyLocation());
+		chip.get(y1).get(x1).setyLocation(temp.getxLocation());
+		chip.get(y1).get(x1).setPins(temp.getPins());
+		chip.get(y1).get(x1).setNets(temp.getNets());
+		chip.get(y1).get(x1).setName(temp.getName());
 	}
 }
